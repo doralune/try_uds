@@ -37,6 +37,13 @@ def do_msg(sock):
         amount_received += len(data)
         print >>sys.stderr, 'received "%s"' % data
 
+def do_size_msg(sock):
+    message = 'This is full message.'
+    size    = '%16d' % len(message)
+    print >>sys.stderr, 'sending "%s"' % message
+    sock.sendall(size)
+    sock.sendall(message)
+
 def run(args):
     # create a socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -53,6 +60,8 @@ def run(args):
         # Send data
         if 'msg' == args.mode:
             do_msg(sock)
+        if 'size_msg' == args.mode:
+            do_size_msg(sock)
     finally:
         print >>sys.stderr, 'closing socket'
         sock.close()

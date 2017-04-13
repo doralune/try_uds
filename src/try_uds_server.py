@@ -36,6 +36,21 @@ def do_msg(connection, client_address):
             print >>sys.stderr, 'no more data from', client_address
             break
 
+def do_size_msg(connection, client_address):
+    data = connection.recv(16)
+    print >>sys.stderr, 'received "%s"' % data
+    size = int(data)
+    print >>sys.stderr, 'receiving next data in size %d' % size
+
+    amount_received = 0
+    amount_expected = size
+
+    data = ""
+    while amount_received < amount_expected:
+        data += connection.recv(16)
+        amount_received += len(data)
+    print >>sys.stderr, 'received "%s"' % data
+
 def run(args):
     # create a socket
     try:
@@ -65,6 +80,8 @@ def run(args):
             print >>sys.stderr, 'connection from', client_address
             if 'msg' == args.mode:
                 do_msg(connection, client_address)
+            if 'size_msg' == args.mode:
+                do_size_msg(connection, client_address)
         finally:
             connection.close()
 
