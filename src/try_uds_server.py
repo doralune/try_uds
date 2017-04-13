@@ -24,7 +24,7 @@ def init():
 
     return args
 
-def do_msg(connection, client_address):
+def do_msg(connection):
     # Receive the data in small chunks and retransmit it
     while True:
         data = connection.recv(16)
@@ -33,10 +33,10 @@ def do_msg(connection, client_address):
             print >>sys.stderr, 'sending data back to the client'
             connection.sendall(data)
         else:
-            print >>sys.stderr, 'no more data from', client_address
+            print >>sys.stderr, 'no more data'
             break
 
-def do_size_msg(connection, client_address):
+def do_size_msg(connection):
     data = connection.recv(16)
     print >>sys.stderr, 'received "%s"' % data
     size = int(data)
@@ -51,7 +51,7 @@ def do_size_msg(connection, client_address):
         amount_received += len(data)
     print >>sys.stderr, 'received "%s"' % data
 
-def do_list(connection, client_address):
+def do_list(connection):
     data = connection.recv(16)
     print >>sys.stderr, 'received "%s"' % data
     num = int(data)
@@ -91,11 +91,11 @@ def run(args):
         try:
             print >>sys.stderr, 'connection from', client_address
             if 'msg' == args.mode:
-                do_msg(connection, client_address)
+                do_msg(connection)
             elif 'size_msg' == args.mode:
-                do_size_msg(connection, client_address)
+                do_size_msg(connection)
             elif 'list' == args.mode:
-                do_list(connection, client_address)
+                do_list(connection)
         finally:
             connection.close()
 

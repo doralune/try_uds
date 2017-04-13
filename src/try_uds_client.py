@@ -50,8 +50,11 @@ def do_list(sock):
     #a_list = [3, 1, '4', 1, 5, 9, 2]
     a_list = [3, 1, '4', np.array([1, None]), 5, 9, 2]
     message = dumps(a_list)
-    num     = '%16d' % int(np.ceil(1.0 * len(message) / 16))
-    print >>sys.stderr, 'sending "%s"' % a_list
+
+    num = int(np.ceil(1.0 * len(message) / 16))
+    print >>sys.stderr, 'sending "%s" in %s times' % (a_list, num)
+
+    num = '%16d' % num
     sock.sendall(num)
     sock.sendall(message)
 
