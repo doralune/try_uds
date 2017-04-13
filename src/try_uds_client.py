@@ -11,15 +11,31 @@ import argparse
 import os
 import sys
 import socket
+from cPickle import dumps, loads
 
 def init():
     server_address = "./uds/dummy"
+    mode = "msg"
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--server_address",  default=server_address)
+    parser.add_argument("--mode", default=mode)
     args = parser.parse_args()
 
     return args
+
+def do_msg(sock):
+    message = 'This is the message.  It will be repeated.'
+    print >>sys.stderr, 'sending "%s"' % message
+    sock.sendall(message)
+
+    amount_received = 0
+    amount_expected = len(message)
+    
+    while amount_received < amount_expected:
+        data = sock.recv(16)
+        amount_received += len(data)
+        print >>sys.stderr, 'received "%s"' % data
 
 def run(args):
     # create a socket
@@ -35,17 +51,8 @@ def run(args):
 
     try:
         # Send data
-        message = 'This is the message.  It will be repeated.'
-        print >>sys.stderr, 'sending "%s"' % message
-        sock.sendall(message)
-
-        amount_received = 0
-        amount_expected = len(message)
-    
-        while amount_received < amount_expected:
-            data = sock.recv(16)
-            amount_received += len(data)
-            print >>sys.stderr, 'received "%s"' % data
+        if 'msg' == args.mode:
+            do_msg(sock)
     finally:
         print >>sys.stderr, 'closing socket'
         sock.close()

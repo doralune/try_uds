@@ -15,13 +15,26 @@ from cPickle import dumps, loads
 
 def init():
     server_address = "./uds/dummy"
+    mode = "msg"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--server_address",  default=server_address)
+    parser.add_argument("--server_address", default=server_address)
+    parser.add_argument("--mode", default=mode)
     args = parser.parse_args()
 
     return args
 
+def do_msg(connection, client_address):
+    # Receive the data in small chunks and retransmit it
+    while True:
+        data = connection.recv(16)
+        print >>sys.stderr, 'received "%s"' % data
+        if data:
+            print >>sys.stderr, 'sending data back to the client'
+            connection.sendall(data)
+        else:
+            print >>sys.stderr, 'no more data from', client_address
+            break
 
 def run(args):
     # create a socket
@@ -42,24 +55,16 @@ def run(args):
     # Listen for incoming connections
     sock.listen(1)
 
-    #
     while True:
         # Wait for a connection
         print >>sys.stderr, 'waiting for a connection'
         connection, client_address = sock.accept()
+
+        # Correspond the client
         try:
             print >>sys.stderr, 'connection from', client_address
-
-            # Receive the data in small chunks and retransmit it
-            while True:
-                data = connection.recv(16)
-                print >>sys.stderr, 'received "%s"' % data
-                if data:
-                    print >>sys.stderr, 'sending data back to the client'
-                    connection.sendall(data)
-                else:
-                    print >>sys.stderr, 'no more data from', client_address
-                    break
+            if 'msg' == args.mode:
+                do_msg(connection, client_address)
         finally:
             connection.close()
 
