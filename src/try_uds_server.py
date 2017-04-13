@@ -51,6 +51,18 @@ def do_size_msg(connection, client_address):
         amount_received += len(data)
     print >>sys.stderr, 'received "%s"' % data
 
+def do_list(connection, client_address):
+    data = connection.recv(16)
+    print >>sys.stderr, 'received "%s"' % data
+    num = int(data)
+    print >>sys.stderr, 'receiving next data in %d times' % num
+
+    data = ""
+    for i in range(num):
+        data += connection.recv(16)
+    a_list = loads(data)
+    print >>sys.stderr, 'received "%s"' % a_list
+
 def run(args):
     # create a socket
     try:
@@ -80,8 +92,10 @@ def run(args):
             print >>sys.stderr, 'connection from', client_address
             if 'msg' == args.mode:
                 do_msg(connection, client_address)
-            if 'size_msg' == args.mode:
+            elif 'size_msg' == args.mode:
                 do_size_msg(connection, client_address)
+            elif 'list' == args.mode:
+                do_list(connection, client_address)
         finally:
             connection.close()
 

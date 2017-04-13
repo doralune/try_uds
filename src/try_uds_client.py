@@ -12,6 +12,7 @@ import os
 import sys
 import socket
 from cPickle import dumps, loads
+import numpy as np
 
 def init():
     server_address = "./uds/dummy"
@@ -44,6 +45,16 @@ def do_size_msg(sock):
     sock.sendall(size)
     sock.sendall(message)
 
+def do_list(sock):
+    #a_list = [3, 1, 4, 1, 5, 9, 2]
+    #a_list = [3, 1, '4', 1, 5, 9, 2]
+    a_list = [3, 1, '4', np.array([1, None]), 5, 9, 2]
+    message = dumps(a_list)
+    num     = '%16d' % int(np.ceil(1.0 * len(message) / 16))
+    print >>sys.stderr, 'sending "%s"' % a_list
+    sock.sendall(num)
+    sock.sendall(message)
+
 def run(args):
     # create a socket
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -60,8 +71,10 @@ def run(args):
         # Send data
         if 'msg' == args.mode:
             do_msg(sock)
-        if 'size_msg' == args.mode:
+        elif 'size_msg' == args.mode:
             do_size_msg(sock)
+        elif 'list' == args.mode:
+            do_list(sock)
     finally:
         print >>sys.stderr, 'closing socket'
         sock.close()
